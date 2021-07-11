@@ -1,0 +1,9 @@
+name: UpgradeEnchant
+author: lrd1122
+version: 1.0
+main: gx.lrd1122.UpgradeEnchant
+commands:
+  upgradeenchant:
+    description: upgradeenchant
+    usage: /<command>
+    aliases: ue
