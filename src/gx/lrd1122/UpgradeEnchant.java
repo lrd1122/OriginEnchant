@@ -1,12 +1,9 @@
 package gx.lrd1122;
 
-import com.sun.org.apache.xerces.internal.xs.StringList;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.Configuration;
-import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -14,21 +11,21 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class UpgradeEnchant extends JavaPlugin {
+    public static JavaPlugin plugin;
     public String prefix = colorize(getConfig().getString("prefix"));
     @Override
     public void onEnable() {
-        System.out.println("[UpgradeEnchant] 插件已成功加载");
+        getLogger().info(prefix + " 插件已成功加载,BUG反馈加Q1794325461");
         getCommand("ue").setExecutor(this);
         getCommand("ue").setTabCompleter(this);
         saveDefaultConfig();
+        plugin=this;
     }
 
     @Override
@@ -42,7 +39,7 @@ public class UpgradeEnchant extends JavaPlugin {
         if(player.hasPermission("ue.help") && args.length == 0 || args[0].equalsIgnoreCase("help"))
         {
             sender.sendMessage(colorize("&e&l=========" + prefix +"->指令帮助=========" +
-                    "\n§8==>§a/ue upgrade <enchant> <level> 提高/减少手中物品的某项附魔 &7ue.upgrade" +
+                    "\n§8==>§a/ue upgrade <enchant> <level> (limit) (checkitem)提高/减少手中物品的某项附魔 &7ue.upgrade" +
                     "\n§8==>§a/ue set <enchant> <level> 设置手中物品的某项附魔 &7ue.set" +
                     "\n§8==>§a/ue list 查看附魔列表 &7ue.list" +
                     "\n§8==>§a/ue randomup <enchant> <min> <max> 随机升级手中物品的某项附魔 &7ue.randomup" +
@@ -66,21 +63,42 @@ public class UpgradeEnchant extends JavaPlugin {
                 int enchant = Integer.valueOf(args[1]);
                 Enchantment enchantment = Enchantment.getById(enchant);
                 try {
-                    UpgradeEnchant(player, enchantment, Integer.valueOf(args[2]));
+                    if(!IsNumber(args[3])) {
+                        UpgradeEnchant(player, enchantment, Integer.valueOf(args[2]));
+                    }
+                    else{
+                        int limit = Integer.valueOf(args[3]);
+                        ItemStack item = player.getItemInHand();
+                        if(GetEnchantLevel(player, enchantment) <= limit && args.length <5 || !args[4].equalsIgnoreCase("true") )
+                        {
+                            UpgradeEnchant(player, enchantment, Integer.valueOf(args[2]));
+                        }
+                        if(args[4].equalsIgnoreCase("true") && CheckEnchant(args[1], item))
+                        {
+                            UpgradeEnchant(player, enchantment, Integer.valueOf(args[2]));
+                        }
+                    }
                 }
                 catch (Exception e)
                 {
-                    UpgradeEnchant(player, enchantment, 1);
                 }
             }
             else {
                 Enchantment enchantment = Enchantment.getByName(args[1]);
                 try {
-                    UpgradeEnchant(player, enchantment, Integer.valueOf(args[2]));
+                    if(!IsNumber(args[3])) {
+                        UpgradeEnchant(player, enchantment, Integer.valueOf(args[2]));
+                    }
+                    else{
+                        int limit = Integer.valueOf(args[3]);
+                        if(GetEnchantLevel(player, enchantment) <= limit)
+                        {
+                            UpgradeEnchant(player, enchantment, Integer.valueOf(args[2]));
+                        }
+                    }
                 }
                 catch (Exception e)
                 {
-                    UpgradeEnchant(player, enchantment, 1);
                 }
             }
             return true;
@@ -161,7 +179,10 @@ public class UpgradeEnchant extends JavaPlugin {
         }
         return null;
     }
-
+    public int GetEnchantLevel(Player player, Enchantment enchantment)
+    {
+        return player.getItemInHand().getEnchantmentLevel(enchantment);
+    }
     public void UpgradeEnchant(Player player, Enchantment enchantment, int addlevel)
     {
         try {
@@ -223,5 +244,15 @@ public class UpgradeEnchant extends JavaPlugin {
     }
     private String colorize(String arg0) {
         return ChatColor.translateAlternateColorCodes('&', arg0);
+    }
+    public static boolean CheckEnchant(String EnchantName, ItemStack item)
+    {
+        ConfigurationSection section = plugin.getConfig().getConfigurationSection("EnchantRestrict");
+        List<String> namelist = section.getStringList(EnchantName);
+        if(namelist.contains(item.getType().name()))
+        {
+            return true;
+        }
+        return false;
     }
 }

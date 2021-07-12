@@ -2,3 +2,9 @@
 prefix: "&a&l[强化附魔]"
 #是否开启附魔修改后的提示
 notify: true
+EnchantRestrict:
+  #请使用数字ID，暂不支持英文附魔名
+  0:
+    #该附魔可用的物品
+    - 'DIAMOND_SWORD'
+    - 'IRON_SWORD'
