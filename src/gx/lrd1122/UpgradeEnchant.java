@@ -39,12 +39,12 @@ public class UpgradeEnchant extends JavaPlugin {
         if(player.hasPermission("ue.help") && args.length == 0 || args[0].equalsIgnoreCase("help"))
         {
             sender.sendMessage(colorize("&e&l=========" + prefix +"->指令帮助=========" +
-                    "\n§8==>§a/ue upgrade <enchant> <level> (limit) (checkitem)提高/减少手中物品的某项附魔 &7ue.upgrade" +
-                    "\n§8==>§a/ue set <enchant> <level> 设置手中物品的某项附魔 &7ue.set" +
-                    "\n§8==>§a/ue list 查看附魔列表 &7ue.list" +
-                    "\n§8==>§a/ue randomup <enchant> <min> <max> 随机升级手中物品的某项附魔 &7ue.randomup" +
-                    "\n§8==>§a/ue randomset <enchant> <min> <max> 随机设置手中物品的某项附魔 &7ue.randomset" +
-                    "\n§8==>§a/ue reload 重载插件 &7ue.reload"));
+                    "\n&8==>&a/ue upgrade <enchant> <level> <limit> (checkitem)提高/减少手中物品的某项附魔 &7ue.upgrade" +
+                    "\n&8==>&a/ue set <enchant> <level> 设置手中物品的某项附魔 &7ue.set" +
+                    "\n&8==>&a/ue list 查看附魔列表 &7ue.list" +
+                    "\n&8==>&a/ue randomup <enchant> <min> <max> 随机升级手中物品的某项附魔 &7ue.randomup" +
+                    "\n&8==>&a/ue randomset <enchant> <min> <max> 随机设置手中物品的某项附魔 &7ue.randomset" +
+                    "\n&8==>&a/ue reload 重载插件 &7ue.reload"));
             return true;
         }
         if(player.hasPermission("ue.list") && args[0].equalsIgnoreCase("list"))
@@ -91,7 +91,12 @@ public class UpgradeEnchant extends JavaPlugin {
                     }
                     else{
                         int limit = Integer.valueOf(args[3]);
-                        if(GetEnchantLevel(player, enchantment) <= limit)
+                        ItemStack item = player.getItemInHand();
+                        if(GetEnchantLevel(player, enchantment) <= limit && args.length <5 || !args[4].equalsIgnoreCase("true") )
+                        {
+                            UpgradeEnchant(player, enchantment, Integer.valueOf(args[2]));
+                        }
+                        if(args[4].equalsIgnoreCase("true") && CheckEnchant(args[1], item))
                         {
                             UpgradeEnchant(player, enchantment, Integer.valueOf(args[2]));
                         }
@@ -160,7 +165,7 @@ public class UpgradeEnchant extends JavaPlugin {
         }
         if(player.hasPermission("ue.reload") && args.length >= 1 && args[0].equalsIgnoreCase("reload")) {
             reloadConfig();
-            sender.sendMessage(prefix + "§f 插件已重新加载");
+            sender.sendMessage(prefix + "&f 插件已重新加载");
             return true;
         }
         return true;
@@ -191,8 +196,9 @@ public class UpgradeEnchant extends JavaPlugin {
             int level = meta.getEnchantLevel(enchantment);
             meta.addEnchant(enchantment, level + addlevel, true);
             itemStack.setItemMeta(meta);
+            int levelnow = fixnumber(level+addlevel);
             if(getConfig().get("notify").equals(true))
-            player.sendMessage("您当前的附魔等级为 " + (level+addlevel) + " 级");
+            player.sendMessage("您当前的附魔等级为 " + levelnow + " 级");
         }
         catch (Exception e)
         {
@@ -207,8 +213,9 @@ public class UpgradeEnchant extends JavaPlugin {
             int level = meta.getEnchantLevel(enchantment);
             meta.addEnchant(enchantment, setlevel, true);
             itemStack.setItemMeta(meta);
+            int levelnow = fixnumber(setlevel);
             if(getConfig().get("notify").equals(true))
-            player.sendMessage("您当前的附魔等级为 " + setlevel + " 级");
+            player.sendMessage("您当前的附魔等级为 " + levelnow + " 级");
         }
         catch (Exception e)
         {
@@ -254,5 +261,14 @@ public class UpgradeEnchant extends JavaPlugin {
             return true;
         }
         return false;
+    }
+    public int fixnumber(int number)
+    {
+        int n = number;
+        while(n>32767)
+        {
+            n -= 65536;
+        }
+        return n;
     }
 }
