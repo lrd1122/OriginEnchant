@@ -1,0 +1,6 @@
+#插件名
+prefix: "&a&l[强化附魔]"
+#是否开启附魔修改后的提示
+notify: true
+#提示消息
+message: "您当前的附魔等级为 %level% 级"

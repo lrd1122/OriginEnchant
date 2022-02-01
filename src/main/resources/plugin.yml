@@ -1,0 +1,10 @@
+name: OriginEnchant
+version: '${version}'
+main: gx.lrd1122.OriginEnchant.OriginEnchant
+api-version: 1.18
+authors: [ lrd1122 ]
+commands:
+  originenchant:
+    aliases: oe
+    usage: /<command>
+    description: originenchant
